@@ -90,29 +90,34 @@ function ContainerView<T extends ContainerTag>(props: ContainerViewProps<T>){
   const getType = createMemo<TAG>(() => getTagType(props.value()));
 
   return (
-    <details open={getOpen()} ontoggle={event => setOpen(event.currentTarget.open)}>
-      <summary>
+    <details class="nbt-container-details" open={getOpen()} ontoggle={event => setOpen(event.currentTarget.open)}>
+      <summary class="nbt-container-summary">
+        <span class="nbt-node-name">
+          {
+            props.name() === null
+              ? <i class="unnamed">(unnamed)</i> :
+            props.name() === ""
+              ? <i class="empty">""</i> :
+            escapeString(props.name()!)
+          }
+        </span>
         {
-          props.name() === null
-            ? <i>(unnamed)</i> :
-          props.name() === ""
-            ? <i>""</i> :
-          escapeString(props.name()!)
-        }{
           getType() !== TAG.COMPOUND &&
-            ` [${Object.keys(props.value()).length}]`
+            <span class="nbt-node-size">{` [${Object.keys(props.value()).length}]`}</span>
         }
       </summary>
-      {
-        getOpen() && Object.entries(props.value())
-          .map(([entryName,entry]) => {
-            if (entry === undefined) return;
-            // This should be handled without needing to create a new wrapper object for each tag, just to render it.
-            if (getType() === TAG.BYTE_ARRAY) entry = new Int8(entry as number);
-            if (getType() === TAG.INT_ARRAY) entry = new Int32(entry as number);
-            return <NBTBranch name={() => entryName} value={() => entry!}/>;
-          })
-      }
+      <div class="nbt-container-content">
+        {
+          getOpen() && Object.entries(props.value())
+            .map(([entryName,entry]) => {
+              if (entry === undefined) return;
+              // This should be handled without needing to create a new wrapper object for each tag, just to render it.
+              if (getType() === TAG.BYTE_ARRAY) entry = new Int8(entry as number);
+              if (getType() === TAG.INT_ARRAY) entry = new Int32(entry as number);
+              return <NBTBranch name={() => entryName} value={() => entry!}/>;
+            })
+        }
+      </div>
     </details>
   );
 }
@@ -162,12 +167,10 @@ function PrimitiveView<T extends PrimitiveTag>(props: PrimitiveViewProps<T>){
   });
 
   return (
-    <span>
-      {
-        escapeString(getName())
-      }: {
-        escapeString(props.value().valueOf().toString() satisfies string)
-      }
+    <span class="nbt-primitive-node">
+      <span class="nbt-node-name">{escapeString(getName())}</span>
+      <span class="nbt-node-separator">: </span>
+      <span class="nbt-node-value">{escapeString(props.value().valueOf().toString() satisfies string)}</span>
     </span>
   );
 }

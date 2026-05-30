@@ -8,17 +8,20 @@ export interface EditorProps {
 
 export function Editor(props: EditorProps){
   return (
-    <textarea
-      name="editor"
-      disabled={props.disabled()}
-      placeholder="NBT data will show here..."
-      wrap="off"
-      spellcheck={false}
-      autocomplete="off"
-      autocapitalize="none"
-      autocorrect="off"
-      value={props.getValue()}
-      oninput={event => props.setValue(event.currentTarget.value)}
-    />
+    <div class="editor-container">
+      <textarea
+        class="editor-textarea"
+        name="editor"
+        disabled={props.disabled()}
+        placeholder="NBT data will show here... Open a file or start writing SNBT."
+        wrap="off"
+        spellcheck={false}
+        autocomplete="off"
+        autocapitalize="none"
+        autocorrect="off"
+        value={props.getValue()}
+        oninput={event => props.setValue(event.currentTarget.value)}
+      />
+    </div>
   );
 }

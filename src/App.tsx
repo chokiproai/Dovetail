@@ -225,6 +225,18 @@ export function App(props: AppProps){
     await saveFile(file,null);
   }
 
+  /**
+   * Resets the editor to its initial empty state.
+  */
+  function closeNBTFile(): void {
+    setEditorDisabled(true);
+    setFileHandle(null);
+    setName("");
+    setEditorValue("");
+    setTreeViewValue(new NBTData({}));
+    document.title = "Dovetail";
+  }
+
   return (
     <>
       <Header
@@ -236,6 +248,7 @@ export function App(props: AppProps){
         setShowFormatDialog={setShowFormatDialog}
         openFile={openNBTFile}
         saveFile={saveNBTFile}
+        closeFile={closeNBTFile}
       />
       <Main
         getRootName={getRootName}
