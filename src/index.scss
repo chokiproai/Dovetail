@@ -1093,28 +1093,79 @@ dialog::backdrop {
   pointer-events: none;
 }
 
-.tree-search-input {
+.tree-search-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
   width: 100%;
-  padding: 0.55rem 1rem 0.55rem 2.5rem;
+  padding: 0 0.75rem 0 2.5rem;
   background: rgba(15, 23, 42, 0.6);
   border: 1px solid var(--border-color);
   border-radius: 8px;
-  color: var(--text-main);
-  font-size: 0.85rem;
-  font-family: var(--font-sans);
-  outline: none;
   transition: all 0.2s ease;
 }
 
-.tree-search-input:focus {
+.tree-search-input-wrapper:focus-within {
   border-color: rgba(99, 102, 241, 0.5);
   box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
   background: rgba(15, 23, 42, 0.8);
 }
 
+.tree-search-input-field {
+  flex-grow: 1;
+  padding: 0.55rem 0.5rem 0.55rem 0;
+  background: transparent;
+  border: none;
+  color: var(--text-main);
+  font-size: 0.85rem;
+  font-family: var(--font-sans);
+  outline: none;
+}
+
+.search-results-counter {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  opacity: 0.8;
+  margin-right: 0.5rem;
+  user-select: none;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.search-nav-buttons {
+  display: flex;
+  align-items: center;
+  gap: 0.15rem;
+  margin-right: 0.5rem;
+  border-right: 1px solid rgba(255, 255, 255, 0.15);
+  padding-right: 0.5rem;
+}
+
+.search-nav-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+  padding: 0;
+}
+
+.search-nav-btn:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-main);
+}
+
+.search-nav-btn:active {
+  background: rgba(255, 255, 255, 0.1);
+}
+
 .search-clear-btn {
-  position: absolute;
-  right: 2.25rem;
   background: transparent;
   border: none;
   color: var(--text-muted);
@@ -1144,6 +1195,45 @@ dialog::backdrop {
   border-bottom: 2px solid #f59e0b;
   border-radius: 2px 2px 0 0;
   padding: 0.05rem 0.1rem;
+}
+
+.search-highlight.active {
+  background: rgba(16, 185, 129, 0.35); /* emerald green with transparency */
+  color: #34d399; /* bright emerald green */
+  border-bottom: 2px solid #10b981;
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.4);
+}
+
+/* Scroll Markers Track overlaying the scrollbar */
+.scroll-markers-track {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 14px;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.scroll-marker {
+  position: absolute;
+  left: 0;
+  right: 2px;
+  height: 3px;
+  background: #f59e0b; /* Amber */
+  box-shadow: 0 0.5px 1px rgba(0, 0, 0, 0.6);
+  transform: translateY(-50%);
+  opacity: 0.85;
+  border-radius: 1px;
+  transition: opacity 0.15s ease, background-color 0.15s ease;
+}
+
+.scroll-marker.active {
+  background: #10b981; /* Emerald Green */
+  height: 5px;
+  z-index: 11;
+  opacity: 1;
+  box-shadow: 0 0 4px rgba(16, 185, 129, 0.8);
 }
 
 /* Inline Edit Controls */
