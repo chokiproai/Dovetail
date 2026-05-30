@@ -842,3 +842,339 @@ dialog::backdrop {
     order: 2;
   }
 }
+
+/* Appended Visual & UX Enhancements */
+
+/* Welcome Dashboard Styles */
+.welcome-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  padding: 2rem;
+  background: radial-gradient(circle at center, rgba(30, 41, 59, 0.4) 0%, rgba(9, 13, 22, 0) 70%);
+  overflow-y: auto;
+}
+
+.welcome-card {
+  background: rgba(17, 24, 39, 0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  padding: 3rem;
+  max-width: 580px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(99, 102, 241, 0.1);
+  animation: modalReveal 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.welcome-logo {
+  margin-bottom: 2.25rem;
+}
+
+.welcome-logo-img {
+  height: 64px;
+  width: auto;
+  filter: drop-shadow(0 0 16px rgba(99, 102, 241, 0.5));
+  margin-bottom: 1.25rem;
+  transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.welcome-card:hover .welcome-logo-img {
+  transform: rotate(360deg) scale(1.1);
+}
+
+.welcome-logo h2 {
+  font-size: 2rem;
+  font-weight: 800;
+  margin: 0 0 0.5rem 0;
+  letter-spacing: -0.03em;
+  background: linear-gradient(135deg, #a5b4fc 0%, #e0e7ff 50%, #c084fc 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.welcome-logo p {
+  color: var(--text-muted);
+  font-size: 1rem;
+  margin: 0;
+}
+
+.welcome-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  margin-bottom: 2rem;
+}
+
+.welcome-btn {
+  justify-content: center;
+  padding: 0.85rem 1.5rem;
+  font-size: 0.95rem;
+  border-radius: 10px;
+  width: 100%;
+}
+
+.welcome-btn svg {
+  width: 20px;
+  height: 20px;
+}
+
+.welcome-dropzone {
+  border: 2px dashed rgba(99, 102, 241, 0.3);
+  border-radius: 12px;
+  padding: 1.75rem 1.25rem;
+  background: rgba(99, 102, 241, 0.02);
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.welcome-dropzone:hover {
+  background: rgba(99, 102, 241, 0.06);
+  border-color: rgba(99, 102, 241, 0.6);
+  box-shadow: 0 0 15px rgba(99, 102, 241, 0.1);
+}
+
+.dropzone-icon {
+  color: var(--text-muted);
+  margin-bottom: 0.75rem;
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.welcome-dropzone:hover .dropzone-icon {
+  color: var(--accent-color);
+  transform: translateY(-3px);
+}
+
+.welcome-dropzone p {
+  margin: 0 0 0.25rem 0;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.welcome-dropzone span {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+/* Full-Screen Drag & Drop Overlay */
+.drag-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(9, 13, 22, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2.5rem;
+  pointer-events: none; /* Let drops bubble correctly */
+}
+
+.drag-overlay-content {
+  border: 3px dashed var(--accent-color);
+  border-radius: 24px;
+  background: rgba(99, 102, 241, 0.05);
+  box-shadow: 0 0 50px rgba(99, 102, 241, 0.25);
+  max-width: 500px;
+  width: 100%;
+  padding: 4rem 2rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.drag-icon {
+  color: var(--accent-color);
+  animation: bounceSlow 1.5s infinite ease-in-out;
+  filter: drop-shadow(0 0 8px rgba(99, 102, 241, 0.6));
+}
+
+@keyframes bounceSlow {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+.drag-overlay-content h3 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.drag-overlay-content p {
+  margin: 0;
+  font-size: 0.95rem;
+  color: var(--text-muted);
+}
+
+/* Bottom Status Bar */
+.app-status-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.45rem 1.25rem;
+  background: #0b0f19;
+  border-top: 1px solid var(--border-color);
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  z-index: 10;
+  height: 28px;
+}
+
+.status-item {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #ef4444;
+  box-shadow: 0 0 4px #ef4444;
+  transition: background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.status-dot.active {
+  background: #10b981;
+  box-shadow: 0 0 6px #10b981;
+}
+
+.status-right {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.status-label {
+  color: var(--text-muted);
+  opacity: 0.6;
+}
+
+.status-value {
+  color: var(--text-main);
+  font-weight: 500;
+}
+
+/* Search panel container layout */
+.tree-panel-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+}
+
+.tree-search-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: 1rem 1.5rem 0.5rem 1.5rem;
+  background: var(--bg-app);
+  z-index: 5;
+}
+
+.search-icon {
+  position: absolute;
+  left: 2.25rem;
+  color: var(--text-muted);
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.tree-search-input {
+  width: 100%;
+  padding: 0.55rem 1rem 0.55rem 2.5rem;
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  color: var(--text-main);
+  font-size: 0.85rem;
+  font-family: var(--font-sans);
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.tree-search-input:focus {
+  border-color: rgba(99, 102, 241, 0.5);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+  background: rgba(15, 23, 42, 0.8);
+}
+
+.search-clear-btn {
+  position: absolute;
+  right: 2.25rem;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 0.25rem;
+  font-size: 0.8rem;
+  opacity: 0.6;
+  transition: opacity 0.2s ease, color 0.2s ease;
+}
+
+.search-clear-btn:hover {
+  opacity: 1;
+  color: var(--text-main);
+}
+
+/* Override tree view padding when wrapped by panel */
+.tree-panel-container .nbt-tree {
+  position: relative;
+  padding-top: 0.5rem;
+  flex-grow: 1;
+}
+
+/* Search Highlights */
+.search-highlight {
+  background: rgba(245, 158, 11, 0.25);
+  color: #fbbf24;
+  border-bottom: 2px solid #f59e0b;
+  border-radius: 2px 2px 0 0;
+  padding: 0.05rem 0.1rem;
+}
+
+/* Inline Edit Controls */
+.nbt-inline-input {
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(99, 102, 241, 0.4);
+  border-radius: 4px;
+  color: var(--syntax-number);
+  font-family: var(--font-mono);
+  font-size: inherit;
+  padding: 0.1rem 0.35rem;
+  outline: none;
+  min-width: 120px;
+  width: auto;
+  max-width: 100%;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3);
+  transition: all 0.25s ease;
+}
+
+.nbt-inline-input:focus {
+  border-color: var(--accent-color);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3), 0 0 8px rgba(99, 102, 241, 0.2);
+}
+
+.nbt-primitive-node.editing {
+  background: rgba(99, 102, 241, 0.05);
+  border-radius: 4px;
+  padding-left: 0.25rem;
+  padding-right: 0.25rem;
+}
+
+.nbt-branch[data-type="8"] .nbt-inline-input { /* String values type input styling color matching */
+  color: var(--syntax-string);
+}

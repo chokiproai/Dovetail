@@ -1,4 +1,4 @@
-import { Match, Switch, createMemo, createSignal } from "solid-js";
+import { Match, Switch, createMemo, createSignal, createEffect, For, Show } from "solid-js";
 import { TAG, getTagType, Int8, Int32 } from "nbtify";
 
 import type { Accessor } from "solid-js";
@@ -8,6 +8,9 @@ export interface NBTBranchProps {
   name: Accessor<string | null>;
   value: Accessor<Tag>;
   open?: boolean;
+  path: (string | number)[];
+  searchQuery: Accessor<string>;
+  onUpdateValue(path: (string | number)[], newValue: any): void;
 }
 
 export function NBTBranch(props: NBTBranchProps){
@@ -17,40 +20,40 @@ export function NBTBranch(props: NBTBranchProps){
     <div class="nbt-branch" data-type={getType()}>
       <Switch>
         <Match when={getType() === TAG.BYTE}>
-          <ByteView name={props.name} value={props.value as Accessor<ByteTag>}/>
+          <ByteView {...props} value={props.value as Accessor<ByteTag>}/>
         </Match>
         <Match when={getType() === TAG.SHORT}>
-          <ShortView name={props.name} value={props.value as Accessor<ShortTag>}/>
+          <ShortView {...props} value={props.value as Accessor<ShortTag>}/>
         </Match>
         <Match when={getType() === TAG.INT}>
-          <IntView name={props.name} value={props.value as Accessor<IntTag>}/>
+          <IntView {...props} value={props.value as Accessor<IntTag>}/>
         </Match>
         <Match when={getType() === TAG.LONG}>
-          <LongView name={props.name} value={props.value as Accessor<LongTag>}/>
+          <LongView {...props} value={props.value as Accessor<LongTag>}/>
         </Match>
         <Match when={getType() === TAG.FLOAT}>
-          <FloatView name={props.name} value={props.value as Accessor<FloatTag>}/>
+          <FloatView {...props} value={props.value as Accessor<FloatTag>}/>
         </Match>
         <Match when={getType() === TAG.DOUBLE}>
-          <DoubleView name={props.name} value={props.value as Accessor<DoubleTag>}/>
+          <DoubleView {...props} value={props.value as Accessor<DoubleTag>}/>
         </Match>
         <Match when={getType() === TAG.BYTE_ARRAY}>
-          <ByteArrayView name={props.name} value={props.value as Accessor<ByteArrayTag>}/>
+          <ByteArrayView {...props} value={props.value as Accessor<ByteArrayTag>}/>
         </Match>
         <Match when={getType() === TAG.STRING}>
-          <StringView name={props.name} value={props.value as Accessor<StringTag>}/>
+          <StringView {...props} value={props.value as Accessor<StringTag>}/>
         </Match>
         <Match when={getType() === TAG.LIST}>
-          <ListView name={props.name} value={props.value as Accessor<ListTag<Tag>>} open={props.open}/>
+          <ListView {...props} value={props.value as Accessor<ListTag<Tag>>}/>
         </Match>
         <Match when={getType() === TAG.COMPOUND}>
-          <CompoundView name={props.name} value={props.value as Accessor<CompoundTag>} open={props.open}/>
+          <CompoundView {...props} value={props.value as Accessor<CompoundTag>}/>
         </Match>
         <Match when={getType() === TAG.INT_ARRAY}>
-          <IntArrayView name={props.name} value={props.value as Accessor<IntArrayTag>}/>
+          <IntArrayView {...props} value={props.value as Accessor<IntArrayTag>}/>
         </Match>
         <Match when={getType() === TAG.LONG_ARRAY}>
-          <LongArrayView name={props.name} value={props.value as Accessor<LongArrayTag>}/>
+          <LongArrayView {...props} value={props.value as Accessor<LongArrayTag>}/>
         </Match>
       </Switch>
     </div>
@@ -83,11 +86,22 @@ interface ContainerViewProps<T extends ContainerTag> {
   name: Accessor<string | null>;
   value: Accessor<T>;
   open?: boolean;
+  path: (string | number)[];
+  searchQuery: Accessor<string>;
+  onUpdateValue(path: (string | number)[], newValue: any): void;
 }
 
 function ContainerView<T extends ContainerTag>(props: ContainerViewProps<T>){
   const [getOpen, setOpen] = createSignal<boolean>(props.open ?? false);
   const getType = createMemo<TAG>(() => getTagType(props.value()));
+
+  // Auto-expand folder if any child contains search match
+  createEffect(() => {
+    const q = props.searchQuery();
+    if (q && containsMatch(props.value(), q)) {
+      setOpen(true);
+    }
+  });
 
   return (
     <details class="nbt-container-details" open={getOpen()} ontoggle={event => setOpen(event.currentTarget.open)}>
@@ -98,7 +112,7 @@ function ContainerView<T extends ContainerTag>(props: ContainerViewProps<T>){
               ? <i class="unnamed">(unnamed)</i> :
             props.name() === ""
               ? <i class="empty">""</i> :
-            escapeString(props.name()!)
+              <HighlightText text={escapeString(props.name()!)} query={props.searchQuery()} />
           }
         </span>
         {
@@ -111,10 +125,21 @@ function ContainerView<T extends ContainerTag>(props: ContainerViewProps<T>){
           getOpen() && Object.entries(props.value())
             .map(([entryName,entry]) => {
               if (entry === undefined) return;
-              // This should be handled without needing to create a new wrapper object for each tag, just to render it.
               if (getType() === TAG.BYTE_ARRAY) entry = new Int8(entry as number);
               if (getType() === TAG.INT_ARRAY) entry = new Int32(entry as number);
-              return <NBTBranch name={() => entryName} value={() => entry!}/>;
+              
+              const isArrayContainer = getType() === TAG.LIST || getType() === TAG.BYTE_ARRAY || getType() === TAG.INT_ARRAY || getType() === TAG.LONG_ARRAY;
+              const childKey = isArrayContainer ? parseInt(entryName, 10) : entryName;
+
+              return (
+                <NBTBranch 
+                  name={() => entryName} 
+                  value={() => entry!}
+                  path={[...props.path, childKey]}
+                  searchQuery={props.searchQuery}
+                  onUpdateValue={props.onUpdateValue}
+                />
+              );
             })
         }
       </div>
@@ -155,9 +180,15 @@ type PrimitiveTag = ByteTag | ShortTag | IntTag | LongTag | FloatTag | DoubleTag
 interface PrimitiveViewProps<T extends PrimitiveTag> {
   name: Accessor<string | null>;
   value: Accessor<T>;
+  path: (string | number)[];
+  searchQuery: Accessor<string>;
+  onUpdateValue(path: (string | number)[], newValue: any): void;
 }
 
 function PrimitiveView<T extends PrimitiveTag>(props: PrimitiveViewProps<T>){
+  const [getIsEditing, setIsEditing] = createSignal<boolean>(false);
+  let isDiscarded = false;
+
   const getName = createMemo<string>(() => {
     const name = props.name();
     if (name === null){
@@ -166,16 +197,62 @@ function PrimitiveView<T extends PrimitiveTag>(props: PrimitiveViewProps<T>){
     return name;
   });
 
+  const submitEdit = (val: string) => {
+    setIsEditing(false);
+    if (isDiscarded) return;
+    const originalValueStr = props.value().valueOf().toString();
+    if (val === originalValueStr) return;
+
+    const type = getTagType(props.value());
+    const parsed = parseNBTValue(val, type);
+    props.onUpdateValue(props.path, parsed);
+  };
+
   return (
-    <span class="nbt-primitive-node">
-      <span class="nbt-node-name">{escapeString(getName())}</span>
-      <span class="nbt-node-separator">: </span>
-      <span class="nbt-node-value">{escapeString(props.value().valueOf().toString() satisfies string)}</span>
-    </span>
+    <Show
+      when={getIsEditing()}
+      fallback={
+        <span class="nbt-primitive-node" ondblclick={() => { isDiscarded = false; setIsEditing(true); }} title="Double-click to edit value">
+          <span class="nbt-node-name">
+            {
+              props.name() === null
+                ? <i class="unnamed">(unnamed)</i> :
+              props.name() === ""
+                ? <i class="empty">""</i> :
+                <HighlightText text={escapeString(getName())} query={props.searchQuery()} />
+            }
+          </span>
+          <span class="nbt-node-separator">: </span>
+          <span class="nbt-node-value">
+            <HighlightText text={escapeString(props.value().valueOf().toString() satisfies string)} query={props.searchQuery()} />
+          </span>
+        </span>
+      }
+    >
+      <span class="nbt-primitive-node editing">
+        <span class="nbt-node-name">{escapeString(getName())}</span>
+        <span class="nbt-node-separator">: </span>
+        <input
+          type="text"
+          class="nbt-inline-input"
+          value={props.value().valueOf().toString()}
+          ref={el => setTimeout(() => el?.focus(), 50)}
+          onkeydown={event => {
+            if (event.key === "Enter") {
+              submitEdit(event.currentTarget.value);
+            } else if (event.key === "Escape") {
+              isDiscarded = true;
+              setIsEditing(false);
+            }
+          }}
+          onblur={event => submitEdit(event.currentTarget.value)}
+        />
+      </span>
+    </Show>
   );
 }
 
-// Borrowed from NBTify's SNBT module for the time being
+// Helper to escape strings
 function escapeString(value: string): string {
   return value
     .replaceAll("\b","\\b")
@@ -183,4 +260,90 @@ function escapeString(value: string): string {
     .replaceAll("\n","\\n")
     .replaceAll("\r","\\r")
     .replaceAll("\t","\\t");
+}
+
+// Helper to check if tag or child tags contain search query
+function containsMatch(tag: Tag, query: string): boolean {
+  if (!query) return false;
+  const q = query.toLowerCase();
+
+  const searchTag = (t: any): boolean => {
+    if (t === null || t === undefined) return false;
+
+    if (typeof t === "string" || typeof t === "number" || typeof t === "boolean") {
+      return t.toString().toLowerCase().includes(q);
+    }
+
+    if (Array.isArray(t)) {
+      return t.some(item => searchTag(item));
+    }
+
+    if (typeof t === "object") {
+      if ("valueOf" in t && typeof t.valueOf === "function") {
+        return t.valueOf().toString().toLowerCase().includes(q);
+      }
+      return Object.entries(t).some(([k, v]) =>
+        k.toLowerCase().includes(q) || searchTag(v)
+      );
+    }
+
+    return false;
+  };
+
+  return searchTag(tag);
+}
+
+// Component to highlight matching search characters
+function HighlightText(props: { text: string; query: string }) {
+  const parts = createMemo(() => {
+    const txt = props.text;
+    const q = props.query;
+    if (!q) return [txt];
+
+    const regex = new RegExp(`(${q.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&")})`, "gi");
+    return txt.split(regex);
+  });
+
+  return (
+    <For each={parts()}>
+      {part =>
+        part.toLowerCase() === props.query.toLowerCase()
+          ? <mark class="search-highlight">{part}</mark>
+          : <span>{part}</span>
+      }
+    </For>
+  );
+}
+
+// Helper to parse primitive values back to their correct NBT types
+function parseNBTValue(val: string, type: TAG): any {
+  switch (type) {
+    case TAG.BYTE:
+      if (val.toLowerCase() === "true") return 1;
+      if (val.toLowerCase() === "false") return 0;
+      const parsedByte = parseInt(val, 10);
+      return isNaN(parsedByte) ? 0 : parsedByte;
+    case TAG.SHORT:
+      const parsedShort = parseInt(val, 10);
+      return isNaN(parsedShort) ? 0 : parsedShort;
+    case TAG.INT:
+      const parsedInt = parseInt(val, 10);
+      return isNaN(parsedInt) ? 0 : parsedInt;
+    case TAG.LONG:
+      try {
+        const cleanVal = val.replace(/[nl]/gi, "");
+        return BigInt(cleanVal);
+      } catch {
+        return 0n;
+      }
+    case TAG.FLOAT:
+      const parsedFloat = parseFloat(val);
+      return isNaN(parsedFloat) ? 0.0 : parsedFloat;
+    case TAG.DOUBLE:
+      const parsedDouble = parseFloat(val);
+      return isNaN(parsedDouble) ? 0.0 : parsedDouble;
+    case TAG.STRING:
+    default:
+      return val;
+  }
 }

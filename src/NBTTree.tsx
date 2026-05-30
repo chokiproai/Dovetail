@@ -8,6 +8,8 @@ import type { RootName } from "nbtify";
 export interface NBTTreeProps {
   name: Accessor<RootName>;
   value: Accessor<NBTData>;
+  searchQuery: Accessor<string>;
+  onUpdateValue(path: (string | number)[], newValue: any): void;
 }
 
 export function NBTTree(props: NBTTreeProps){
@@ -15,7 +17,14 @@ export function NBTTree(props: NBTTreeProps){
 
   return (
     <div class="nbt-tree">
-      <NBTBranch name={props.name} value={getRootTag} open/>
+      <NBTBranch 
+        name={props.name} 
+        value={getRootTag} 
+        open
+        path={[]}
+        searchQuery={props.searchQuery}
+        onUpdateValue={props.onUpdateValue}
+      />
     </div>
   );
 }
